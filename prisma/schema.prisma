@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// schema.prisma
+
+// model User {
+//     id        Int       @id @default(autoincrement())
+//     username  String
+//     business  Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+//     businessId Int?
+//   }
+
+//   model Business {
+//     id      Int     @id @default(autoincrement())
+//     name    String
+//     users   User[]
+//   }
+
+// schema.prisma
+
+// model User {
+//   id         Int       @id @default(autoincrement())
+//   username   String
+//   business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+//   businessId Int?
+// }
+
+// model Business {
+//   id       Int       @id @default(autoincrement())
+//   name     String
+//   users    User[]
+//   products Product[]
+// }
+
+// model Product {
+//   id         Int      @id @default(autoincrement())
+//   name       String
+//   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+//   businessId Int
+// }
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+enum Role {
+    SUPERADMIN
+    ADMIN
+    USER
+}
+
+model User {
+    id         Int         @id @default(autoincrement())
+    name       String?
+    email      String?     @unique
+    username   String?
+    password   String
+    pinCode    Int?
+    userCode   String?
+    rfid       String?
+    role       Role
+    createdBy  Role
+    createdAt  DateTime    @default(now())
+    updatedAt  DateTime    @updatedAt
+    business   Businesses? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+    businessId Int?
+}
+
+model Businesses {
+    id              Int             @id @default(autoincrement())
+    businessName    String          @unique
+    businessAddress String?
+    businessNumber  Int?
+    telephoneNumber String?
+    isActive        Boolean         @default(true)
+    createdAt       DateTime        @default(now())
+    updatedAt       DateTime        @updatedAt
+    users           User[]
+    categories      Categories[]
+    manufacturers   Manufacturers[]
+    suppliers       Suppliers[]
+    products        Products[]
+}
+
+model Categories {
+    id         Int         @id @default(autoincrement())
+    brandName  String?
+    country    String?
+    city       String?
+    business   Businesses? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+    businessId Int?
+    products   Products[]
+    createdAt  DateTime    @default(now())
+    updatedAt  DateTime    @updatedAt
+}
+
+model Manufacturers {
+    id          Int         @id @default(autoincrement())
+    name        String?
+    webAddress  String?
+    description String?     @db.LongText
+    business    Businesses? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+    businessId  Int?
+    products    Products[]
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+}
+
+model Suppliers {
+    id                 Int         @id @default(autoincrement())
+    name               String?
+    address            String?
+    telephone          String?
+    email              String?
+    postalCode         String?
+    place              String?
+    country            String?
+    customerNumber     String?
+    bankAccount        String?
+    webAddress         String?
+    paymentInformation String?
+    description        String?     @db.LongText
+    business           Businesses? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+    businessId         Int?
+    products           Products[]
+    createdAt          DateTime    @default(now())
+    updatedAt          DateTime    @updatedAt
+}
+
+model Products {
+    id                      Int            @id @default(autoincrement())
+    name                    String?
+    year                    Int?
+    barCode                 BigInt?
+    isActive                Boolean        @default(true)
+    costPriceExcludingVat   Decimal?
+    markupPercent           Decimal?
+    retailPriceExcludingVat Decimal?
+    retailPriceIncludingVat Decimal?
+    stockBalance            Int?
+    minimumStockBalance     Int?
+    maximumStockBalance     Int?
+    manufacturer            Manufacturers? @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+    manufacturerId          Int?
+    category                Categories?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+    categoryId              Int?
+    supplier                Suppliers?     @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+    supplierId              Int?
+    business                Businesses?    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+    businessId              Int?
+    createdBy               String?
+    createdAt               DateTime       @default(now())
+    updatedAt               DateTime       @updatedAt
+}
